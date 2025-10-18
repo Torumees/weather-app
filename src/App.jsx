@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import SearchBar from "./components/SearchBar";
 import RecentList from "./components/RecentList";
+import ErrorBanner from "./components/RecentList";
 const LS_KEY = "weather_recent_v1";
 const MAX_RECENT = 3;
 
@@ -108,11 +109,7 @@ export default function App() {
         placeholder="Sisesta linn (nt Tallinn)"
       />
 
-      {err && (
-        <p aria-live="polite" style={{ color: "crimson", marginTop: 10 }}>
-          {err}
-        </p>
-      )}
+      <ErrorBanner message={ err }></ErrorBanner>
 
       {data && (
         <div style={{ marginTop: 16, padding: 16, border: "1px solid #eee", borderRadius: 12 }}>
