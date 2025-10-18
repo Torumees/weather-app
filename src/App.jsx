@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 const LS_KEY = "weather_recent_v1";
 const MAX_RECENT = 3;
 
@@ -8,6 +8,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
   const [recent, setRecent] = useState([]);
+  const reqRef = useRef(null); // <-- liigutatud siia (komponendi sisse)
 
   // loe ajalugu mountimisel
   useEffect(() => {
@@ -28,10 +29,16 @@ export default function App() {
     } catch {}
   }
 
-  async function searchCity(e) {
-    if (e) e.preventDefault();
-    const city = q.trim();
+  async function searchCity(eOrCity) {
+    // lubame kutsuda nii submit-ürituse kui ka otse stringiga
+    if (typeof eOrCity === "object" && eOrCity?.preventDefault) eOrCity.preventDefault();
+    const city = (typeof eOrCity === "string" ? eOrCity : q).trim();
     if (!city) return;
+
+    // tühista eelmised requestid
+    reqRef.current?.abort();
+    const controller = new AbortController();
+    reqRef.current = controller;
 
     setLoading(true);
     setErr("");
@@ -40,25 +47,30 @@ export default function App() {
     try {
       // 1) geokodeerimine
       const geoRes = await fetch(
-        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=et&format=json`
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=et&format=json`, 
+        { signal: controller.signal }
       );
+      if (!geoRes.ok) throw new Error(`Geo HTTP ${geoRes.status}`);
       const geo = await geoRes.json();
-      if (!geo.results || !geo.results.length) {
-        setErr("Linna ei leitud.");
-        return;
-      }
+      if (!geo.results?.length) {
+         setErr("Linna ei leitud.");
+          return; 
+        }
       const { latitude, longitude, name, country } = geo.results[0];
 
       // 2) ilm
       const meteoRes = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,wind_speed_10m`
+        `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,wind_speed_10m`,
+        { signal: controller.signal }
       );
+      if (!meteoRes.ok) throw new Error(`Meteo HTTP ${meteoRes.status}`);
       const meteo = await meteoRes.json();
 
       setData({ place: `${name}, ${country}`, current: meteo.current });
       saveRecent(name);
+      setQ(city);
     } catch (e) {
-      setErr("Midagi läks valesti. Proovi uuesti.");
+      if (e.name !== "AbortError") setErr("Midagi läks valesti. Proovi uuesti.");
     } finally {
       setLoading(false);
     }
@@ -66,7 +78,7 @@ export default function App() {
 
   function quickSearch(city) {
     setQ(city);
-    setTimeout(() => searchCity(), 0);
+    searchCity(city);
   }
 
   function clearRecent() {
@@ -122,12 +134,16 @@ export default function App() {
           onChange={(e) => setQ(e.target.value)}
           style={{ flex: 1, padding: 10, borderRadius: 8, border: "1px solid #ccc" }}
         />
-        <button disabled={loading} style={{ padding: "10px 14px" }}>
+        <button type="submit" disabled={loading} style={{ padding: "10px 14px" }}>
           {loading ? "Laadin…" : "Otsi"}
         </button>
       </form>
 
-      {err && <p style={{ color: "crimson", marginTop: 10 }}>{err}</p>}
+      {err && (
+        <p aria-live="polite" style={{ color: "crimson", marginTop: 10 }}>
+          {err}
+        </p>
+      )}
 
       {data && (
         <div style={{ marginTop: 16, padding: 16, border: "1px solid #eee", borderRadius: 12 }}>

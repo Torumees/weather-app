@@ -35,3 +35,16 @@ Klooni repo:
 ```bash
 git clone https://github.com/torumees/weather-app.git
 cd weather-app
+
+
+## Install
+npm install
+
+## Dev
+npm run dev
+
+## Build
+npm run build
+
+## Vercel LIVE
+https://weather-app-three-wine-32.vercel.app/
