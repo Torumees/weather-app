@@ -3,6 +3,7 @@ import SearchBar from "./components/SearchBar";
 import RecentList from "./components/RecentList";
 import ErrorBanner from "./components/ErrorBanner";
 import WeatherCard from "./components/WeatherCard/WeatherCard";
+import Loader from "./components/Loader";
 const LS_KEY = "weather_recent_v1";
 const MAX_RECENT = 3;
 
@@ -93,34 +94,29 @@ export default function App() {
   }
 
   return (
-    <main style={{ maxWidth: 720, margin: "40px auto", padding: "0 16px" }}>
-      <h1 style={{ marginBottom: 12 }}>Weather App</h1>
+    <main style={{ maxWidth: 720, margin: "40px auto", padding: "0 16px" }} aria-busy={loading || undefined}>
+    <h1 style={{ marginBottom: 12 }}>Weather App</h1>
 
-      <RecentList
-        items={recent}
-        onPick={(city) => { setQ(city); searchCity(city);}}
-        onClear={clearRecent}
-      />
-      
-      <SearchBar
-        value={q}
-        onChange={setQ}
-        onSubmit={searchCity}
-        loading={loading}
-        placeholder="Sisesta linn (nt Tallinn)"
-      />
+    <RecentList
+      items={recent}
+      onPick={(city) => { setQ(city); searchCity(city); }}
+      onClear={clearRecent}
+    />
 
-      <ErrorBanner
-       message={ err }
-      />
+    <SearchBar
+      value={q}
+      onChange={setQ}
+      onSubmit={searchCity}
+      loading={loading}
+      placeholder="Sisesta linn (nt Tallinn)"
+    />
 
-      {data && (
-        <WeatherCard
-         place={data.place}
-          current={data.current}
-        /> 
-      )}
-      
-    </main>
+    {/* Kui päring käib, näita globaalset loaderit */}
+    {loading && <Loader label="Laen ilmainfot…" />}
+
+    <ErrorBanner message={err} />
+
+    {data && <WeatherCard place={data.place} current={data.current} />}
+  </main>
   );
 }
