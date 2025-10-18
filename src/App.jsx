@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 const LS_KEY = "weather_recent_v1";
 const MAX_RECENT = 3;
 
