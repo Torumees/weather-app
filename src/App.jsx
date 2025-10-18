@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
-import SearchBar from "./components/SearchBar/SearchBar";
+import SearchBar from "./components/SearchBar";
+import RecentList from "./components/RecentList";
 const LS_KEY = "weather_recent_v1";
 const MAX_RECENT = 3;
 
@@ -93,41 +94,12 @@ export default function App() {
     <main style={{ maxWidth: 720, margin: "40px auto", padding: "0 16px" }}>
       <h1 style={{ marginBottom: 12 }}>Weather App</h1>
 
-      {recent.length > 0 && (
-        <div style={{ marginBottom: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
-          {recent.map((c) => (
-            <button
-              key={c}
-              onClick={() => quickSearch(c)}
-              style={{
-                padding: "6px 10px",
-                borderRadius: 999,
-                border: "1px solid #eee",
-                color: "GrayText",
-                background: "#f8f8f8",
-                cursor: "pointer",
-              }}
-            >
-              {c}
-            </button>
-          ))}
-          <button
-            onClick={clearRecent}
-            style={{
-              padding: "6px 10px",
-              borderRadius: 999,
-              border: "1px solid #eee",
-              background: "transparent",
-              color: "#666",
-              cursor: "pointer",
-            }}
-            title="Tühjenda ajalugu"
-          >
-            Tühjenda
-          </button>
-        </div>
-      )}
-
+      <RecentList
+        items={recent}
+        onPick={(city) => { setQ(city); searchCity(city);}}
+        onClear={clearRecent}
+      />
+      
       <SearchBar
         value={q}
         onChange={setQ}
