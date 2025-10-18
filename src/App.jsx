@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import SearchBar from "./components/SearchBar/SearchBar";
 const LS_KEY = "weather_recent_v1";
 const MAX_RECENT = 3;
 
@@ -127,17 +128,13 @@ export default function App() {
         </div>
       )}
 
-      <form onSubmit={searchCity} style={{ display: "flex", gap: 8 }}>
-        <input
-          placeholder="Sisesta linn (nt Tallinn)"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          style={{ flex: 1, padding: 10, borderRadius: 8, border: "1px solid #ccc" }}
-        />
-        <button type="submit" disabled={loading} style={{ padding: "10px 14px" }}>
-          {loading ? "Laadin…" : "Otsi"}
-        </button>
-      </form>
+      <SearchBar
+        value={q}
+        onChange={setQ}
+        onSubmit={searchCity}
+        loading={loading}
+        placeholder="Sisesta linn (nt Tallinn)"
+      />
 
       {err && (
         <p aria-live="polite" style={{ color: "crimson", marginTop: 10 }}>
