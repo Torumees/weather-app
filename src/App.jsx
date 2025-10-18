@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import SearchBar from "./components/SearchBar";
 import RecentList from "./components/RecentList";
-import ErrorBanner from "./components/RecentList";
+import ErrorBanner from "./components/ErrorBanner";
+import WeatherCard from "./components/WeatherCard/WeatherCard";
 const LS_KEY = "weather_recent_v1";
 const MAX_RECENT = 3;
 
@@ -109,15 +110,17 @@ export default function App() {
         placeholder="Sisesta linn (nt Tallinn)"
       />
 
-      <ErrorBanner message={ err }></ErrorBanner>
+      <ErrorBanner
+       message={ err }
+      />
 
       {data && (
-        <div style={{ marginTop: 16, padding: 16, border: "1px solid #eee", borderRadius: 12 }}>
-          <h2 style={{ marginTop: 0 }}>{data.place}</h2>
-          <p><strong>Temperatuur:</strong> {data.current?.temperature_2m} °C</p>
-          <p><strong>Tuul:</strong> {data.current?.wind_speed_10m} m/s</p>
-        </div>
+        <WeatherCard
+         place={data.place}
+          current={data.current}
+        /> 
       )}
+      
     </main>
   );
 }
